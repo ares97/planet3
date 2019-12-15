@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29411.108
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Multitasking_ThreadPool", "Multitasking_ThreadPool.csproj", "{9F4255D7-1040-4976-8D4B-A486E539507D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageWorker", "ImageWorker\ImageWorker.csproj", "{74119E12-E764-49CE-800F-19900C10EA3D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{9F4255D7-1040-4976-8D4B-A486E539507D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F4255D7-1040-4976-8D4B-A486E539507D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F4255D7-1040-4976-8D4B-A486E539507D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F4255D7-1040-4976-8D4B-A486E539507D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74119E12-E764-49CE-800F-19900C10EA3D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74119E12-E764-49CE-800F-19900C10EA3D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74119E12-E764-49CE-800F-19900C10EA3D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74119E12-E764-49CE-800F-19900C10EA3D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {265F1943-2AE5-4089-B30C-A7E192718391}
+	EndGlobalSection
+EndGlobal
