@@ -33,7 +33,7 @@ namespace ImageWorker
                         if (int.TryParse(arg, out int height))
                         {
                             ImageWorker.Height = height;
-                        };
+                        }
                         break;
                     case "set_width":
                         arg = Console.ReadLine();
@@ -41,6 +41,7 @@ namespace ImageWorker
                         {
                             ImageWorker.Width = width;
                         }
+
                         break;
                     case "get_current_files":
                         arg = String.Join(", ", ImageWorker.CurrentFiles.ToArray());
@@ -57,17 +58,11 @@ namespace ImageWorker
                             Console.WriteLine("Null");
                         break;
                     case "get_progress":
-                        float progress = (float)ImageWorker.FilesProcessed / Math.Max(1, ImageWorker.TotalFiles);
+                        float progress = (float) ImageWorker.FilesProcessed / Math.Max(1, ImageWorker.TotalFiles);
                         arg = progress.ToString();
                         Console.WriteLine(arg);
                         break;
                 }
-
-                string ending;
-                do
-                {
-                    ending = Console.ReadLine();
-                } while (ending != "SYNC");
                 ImageWorker.ProcessQueue();
             }
         }

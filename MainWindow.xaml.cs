@@ -15,14 +15,14 @@ namespace Multitasking_ThreadPool
         {
             InitializeComponent();
             DataContext = _viewModel;
-            //new Thread(ServeGui).Start();
+            new Thread(ServeGui).Start();
         }
 
         private void ServeGui()
         {
             while (true)
             {
-                Thread.Sleep(100);
+                Thread.Sleep(200);
                 var currentFiles = WorkManager.GetInstance().GetCurrentFiles();
                 currentFiles_Label.Dispatcher?.BeginInvoke((Action) (() => currentFiles_Label.Content = currentFiles));
 
