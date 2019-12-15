@@ -5,101 +5,90 @@ using System.Threading;
 
 namespace Multitasking_ThreadPool
 {
-    class WorkManager
+    internal class WorkManager
     {
-        private static WorkManager instance = null;
-        private static Worker worker;
-        private FileWatcher watcher;
+        private static WorkManager _instance;
+        private static Worker _worker;
 
-        private List<string> logs;
+        private static readonly Mutex Mutex = new Mutex();
 
-        private static Mutex mutex = new Mutex();
-
-        public static WorkManager getInstance()
-        {
-            if (instance == null)
-                instance = new WorkManager();
-            return instance;
-        }
+        private readonly List<string> _logs;
+        private readonly FileWatcher _watcher;
 
         private WorkManager()
         {
-            worker = new Worker();
-            watcher = new FileWatcher();
-            logs = new List<string>();
+            _worker = new Worker();
+            _watcher = new FileWatcher();
+            _logs = new List<string>();
+        }
+
+        public static WorkManager GetInstance()
+        {
+            return _instance ?? (_instance = new WorkManager());
         }
 
         public void StartWatcher(string path)
         {
             ProcessExistingFiles(path);
-            watcher.Start(path);
+            _watcher.Start(path);
         }
 
         private void ProcessExistingFiles(string path)
         {
-            string[] files = Directory.GetFiles(path, "*.png", SearchOption.AllDirectories);
-            foreach (var file in files)
-            {
-                ProcessFile(file);
-            }
+            var files = Directory.GetFiles(path, "*.png", SearchOption.AllDirectories);
+            foreach (var file in files) ProcessFile(file);
         }
 
         public void AbortWatcher()
         {
-            watcher?.Abort();
+            _watcher?.Abort();
         }
 
         public string ReadFromWorker()
         {
-            return worker.Read();
+            return _worker.Read();
         }
 
         public void WriteToWorker(string message)
         {
-            worker.Write(message);
+            _worker.Write(message);
         }
 
         public void Quit()
         {
-            worker.Quit();
+            _worker.Quit();
         }
 
         public void SetOutputDir(string outDir)
         {
-            mutex.WaitOne();
-            logs.Insert(0,"Setting out dir: " + outDir);
+            Mutex.WaitOne();
+            _logs.Insert(0, "Setting out dir: " + outDir);
             WriteToWorker("set_output_dir");
             WriteToWorker(outDir);
-            SyncWorker();
-        }
-
-        private void SyncWorker()
-        {
-            WriteToWorker("SYNC");
-            mutex.ReleaseMutex();
+            Mutex.ReleaseMutex();
         }
 
         public void SetImageSize(string height, string width)
         {
-            mutex.WaitOne();
-            logs.Insert(0, "Setting height: " + height);
+            Mutex.WaitOne();
+            _logs.Insert(0, "Setting height: " + height);
             WriteToWorker("set_height");
             WriteToWorker(height);
-            SyncWorker();
+            Mutex.ReleaseMutex();
 
-            mutex.WaitOne();
-            logs.Insert(0,"Setting width: " + width);
+            Mutex.WaitOne();
+            _logs.Insert(0, "Setting width: " + width);
             WriteToWorker("set_width");
             WriteToWorker(width);
-            SyncWorker();
+            Mutex.ReleaseMutex();
         }
 
         public List<string> GetQueuedFiles()
         {
-            mutex.WaitOne();
+            Mutex.WaitOne();
             WriteToWorker("get_queued_files");
             var files = ReadFromWorker();
-            SyncWorker();
+            Mutex.ReleaseMutex();
             if (files == "Null" || files == null)
                 return new List<string>();
             return files.Split(',').ToList();
@@ -107,15 +96,15 @@ namespace Multitasking_ThreadPool
 
         public List<string> GetLogs()
         {
-            return logs;
+            return _logs;
         }
 
         public string GetCurrentFiles()
         {
-            mutex.WaitOne();
+            Mutex.WaitOne();
             WriteToWorker("get_current_files");
             var files = ReadFromWorker();
-            SyncWorker();
+            Mutex.ReleaseMutex();
             if (files == "Null" || files == null)
                 return "No files";
             return files;
@@ -123,20 +112,20 @@ namespace Multitasking_ThreadPool
 
         public string GetProgress()
         {
-            mutex.WaitOne();
+            Mutex.WaitOne();
             WriteToWorker("get_progress");
             var progress = ReadFromWorker();
-            SyncWorker();
+            Mutex.ReleaseMutex();
             return progress;
         }
 
         public void ProcessFile(string path)
         {
-            logs.Insert(0,"Processing file " + path);
-            mutex.WaitOne();
-            WorkManager.getInstance().WriteToWorker("add");
-            WorkManager.getInstance().WriteToWorker(path);
-            SyncWorker();
+            _logs.Insert(0, "Processing file " + path);
+            Mutex.WaitOne();
+            GetInstance().WriteToWorker("add");
+            GetInstance().WriteToWorker(path);
+            Mutex.ReleaseMutex();
         }
     }
 }

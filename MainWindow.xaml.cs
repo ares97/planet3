@@ -1,91 +1,92 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Threading;
 using System.Windows;
 using System.Windows.Data;
+using System.Windows.Forms;
 
 namespace Multitasking_ThreadPool
 {
     public partial class MainWindow : Window
     {
-        ViewModel _viewModel = new ViewModel("select path", "select path");
+        private readonly ViewModel _viewModel = new ViewModel("select path", "select path");
 
         public MainWindow()
         {
             InitializeComponent();
             DataContext = _viewModel;
-            new Thread(new ThreadStart(ServeGui)).Start();
+            //new Thread(ServeGui).Start();
         }
 
-        void ServeGui()
+        private void ServeGui()
         {
             while (true)
             {
                 Thread.Sleep(100);
-                var currentFiles = WorkManager.getInstance().GetCurrentFiles();
-                currentFiles_Label.Dispatcher?.BeginInvoke((Action)(() => currentFiles_Label.Content = currentFiles));
+                var currentFiles = WorkManager.GetInstance().GetCurrentFiles();
+                currentFiles_Label.Dispatcher?.BeginInvoke((Action) (() => currentFiles_Label.Content = currentFiles));
 
-                var queuedFiles = WorkManager.getInstance().GetQueuedFiles();
-                filesQueueListBox.Dispatcher?.BeginInvoke((Action)(() => filesQueueListBox.ItemsSource = queuedFiles));
-                filesQueueListBox.Dispatcher?.BeginInvoke((Action)(() => CollectionViewSource.GetDefaultView(filesQueueListBox.ItemsSource).Refresh()));
+                var queuedFiles = WorkManager.GetInstance().GetQueuedFiles();
+                filesQueueListBox.Dispatcher?.BeginInvoke((Action) (() => filesQueueListBox.ItemsSource = queuedFiles));
+                filesQueueListBox.Dispatcher?.BeginInvoke((Action) (() =>
+                    CollectionViewSource.GetDefaultView(filesQueueListBox.ItemsSource).Refresh()));
 
-                var logs = WorkManager.getInstance().GetLogs();
-                //logs.Reverse();
-                logsListBox.Dispatcher?.BeginInvoke((Action)(() => logsListBox.ItemsSource = logs));
-                logsListBox.Dispatcher?.BeginInvoke((Action)(() => CollectionViewSource.GetDefaultView(logsListBox.ItemsSource).Refresh()));
+                var logs = WorkManager.GetInstance().GetLogs();
+                logsListBox.Dispatcher?.BeginInvoke((Action) (() => logsListBox.ItemsSource = logs));
+                logsListBox.Dispatcher?.BeginInvoke((Action) (() =>
+                    CollectionViewSource.GetDefaultView(logsListBox.ItemsSource).Refresh()));
 
-                var progress = WorkManager.getInstance().GetProgress();
+                var progress = WorkManager.GetInstance().GetProgress();
                 try
                 {
                     progress = ((int) (float.Parse(progress) * 100)).ToString();
-                    currentProgress_Label.Dispatcher?.BeginInvoke((Action)(() => currentProgress_Label.Content = progress));
-                } catch(Exception) { }
-            }
-        }
-
-        private void inputFolder_Click(object sender, RoutedEventArgs e)
-        {
-            using (System.Windows.Forms.FolderBrowserDialog dialog = new System.Windows.Forms.FolderBrowserDialog())
-            {
-                if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                    currentProgress_Label.Dispatcher?.BeginInvoke((Action) (() =>
+                        currentProgress_Label.Content = progress));
+                }
+                catch (Exception)
                 {
-                    ((ViewModel)DataContext).inputPath = dialog.SelectedPath;
-                    observedDir_Label.GetBindingExpression(ContentProperty)?.UpdateTarget();
-                    WorkManager.getInstance().AbortWatcher();
+                    // ignored
                 }
             }
         }
 
-        private void outputFolder_Click(object sender, RoutedEventArgs e)
+        private void InputFolder_Click(object sender, RoutedEventArgs e)
         {
-            using (System.Windows.Forms.FolderBrowserDialog dialog = new System.Windows.Forms.FolderBrowserDialog())
+            using (var dialog = new FolderBrowserDialog())
             {
-                if (dialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-                {
-                    ((ViewModel)DataContext).outputPath = dialog.SelectedPath;
-                    outputDir_Label.GetBindingExpression(ContentProperty)?.UpdateTarget();
-                    var outDir = _viewModel.outputPath;
-                    WorkManager.getInstance().SetOutputDir(outDir);
-                }
+                if (dialog.ShowDialog() != System.Windows.Forms.DialogResult.OK) return;
+                ((ViewModel) DataContext).InputPath = dialog.SelectedPath;
+                observedDir_Label.GetBindingExpression(ContentProperty)?.UpdateTarget();
+                WorkManager.GetInstance().AbortWatcher();
             }
         }
 
-        private void startObserving_Click(object sender, RoutedEventArgs e)
+        private void OutputFolder_Click(object sender, RoutedEventArgs e)
         {
-            string path = _viewModel.inputPath;
-            WorkManager.getInstance().StartWatcher(path);
+            using (var dialog = new FolderBrowserDialog())
+            {
+                if (dialog.ShowDialog() != System.Windows.Forms.DialogResult.OK) return;
+                ((ViewModel) DataContext).OutputPath = dialog.SelectedPath;
+                outputDir_Label.GetBindingExpression(ContentProperty)?.UpdateTarget();
+                var outDir = _viewModel.OutputPath;
+                WorkManager.GetInstance().SetOutputDir(outDir);
+            }
+        }
+
+        private void StartObserving_Click(object sender, RoutedEventArgs e)
+        {
+            var path = _viewModel.InputPath;
+            WorkManager.GetInstance().StartWatcher(path);
         }
 
         private void SetNewSize_Click(object sender, RoutedEventArgs e)
         {
-            WorkManager.getInstance().SetImageSize(ImageHeight.Text, ImageWidth.Text);
+            WorkManager.GetInstance().SetImageSize(ImageHeight.Text, ImageWidth.Text);
         }
 
-        void DataWindow_Closing(object sender, CancelEventArgs e)
+        private void DataWindow_Closing(object sender, CancelEventArgs e)
         {
-            WorkManager.getInstance().Quit();
+            WorkManager.GetInstance().Quit();
         }
     }
 }

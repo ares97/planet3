@@ -1,16 +1,14 @@
 ﻿namespace Multitasking_ThreadPool
 {
-    class ViewModel
+    internal class ViewModel
     {
-        public ViewModel(string v1, string v2)
+        public ViewModel(string inp, string outp)
         {
-            this.inputPath = v1;
-            this.outputPath = v2;
+            InputPath = inp;
+            OutputPath = outp;
         }
 
-        public string inputPath { get; set; }
-        public string outputPath { get; set; }
-
-
+        public string InputPath { get; set; }
+        public string OutputPath { get; set; }
     }
 }
