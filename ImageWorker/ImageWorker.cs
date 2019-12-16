@@ -44,7 +44,8 @@ namespace ImageWorker
             {
                 var queuedFile = QueuedFiles[entry];
                 QueuedFiles.Remove(queuedFile);
-                Task.Factory.StartNew(() => ProcessFile(queuedFile));
+                //Task.Factory.StartNew(() => ProcessFile(queuedFile));
+                ThreadPool.QueueUserWorkItem(callback => ProcessFile(queuedFile));
             }
         }
 
